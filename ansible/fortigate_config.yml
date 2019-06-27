@@ -1,0 +1,266 @@
+- hosts: localhost
+  connection: local
+  gather_facts: "no"
+  vars:
+   vdom: "root"
+  tasks:
+  - name: VIP FortiAnalyzer HTTPS GUI
+    fortios_firewall_vip:
+      host:  "{{ host }}:443"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      vdom:  "{{ vdom }}"
+      https: True
+      firewall_vip:
+        state: "present"
+        color: "4"
+        name: "VIP_FAZ_MGMT_GUI"
+        comment: "VIP for FAZ MGMT GUI"
+        extintf: "port1"
+        extip: "{{ fgt_external_ip }}"
+        extport: "8443"
+        mappedip:
+         -
+            range: "{{ faz_internal_ip }}"
+        mappedport: "443"
+        portforward: "enable"
+        portmapping-type: "1-to-1"
+        protocol: "tcp"
+  - name: VIP FortiAnalyzer SSH CLI
+    fortios_firewall_vip:
+      host:  "{{ host }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      vdom:  "{{ vdom }}"
+      https: True
+      firewall_vip:
+        state: "present"
+        color: "4"
+        name: "VIP_FAZ_MGMT_CLI"
+        comment: "VIP for FAZ MGMT CLI"
+        extintf: "port1"
+        extip: "{{ fgt_external_ip }}"
+        extport: "8444"
+        mappedip:
+         -
+            range: "{{ faz_internal_ip }}"
+        mappedport: "22"
+        portforward: "enable"
+        portmapping-type: "1-to-1"
+        protocol: "tcp"
+  - name: VIP Webserver SSH CLI
+    fortios_firewall_vip:
+      host:  "{{ host }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      vdom:  "{{ vdom }}"
+      https: "True"
+      firewall_vip:
+        state: "present"
+        color: "4"
+        name: "VIP_LNX_CLI"
+        comment: "VIP for FAZ MGMT CLI"
+        extintf: "port1"
+        extip: "{{ fgt_external_ip }}"
+        extport: "8445"
+        mappedip:
+         -
+            range: "{{ lnx_internal_ip }}"
+        mappedport: "22"
+        portforward: "enable"
+        portmapping-type: "1-to-1"
+        protocol: "tcp"
+  - name: VIP Webserver HTTP
+    fortios_firewall_vip:
+      host:  "{{ host }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      vdom:  "{{ vdom }}"
+      https: True
+      firewall_vip:
+        state: "present"
+        color: "4"
+        name: "VIP_LNX_HTTP"
+        comment: "VIP for LNX HTTP"
+        extintf: "port1"
+        extip: "{{ fgt_external_ip }}"
+        extport: "8446"
+        mappedip:
+         -
+            range: "{{ lnx_internal_ip }}"
+        mappedport: "80"
+        portforward: "enable"
+        portmapping-type: "1-to-1"
+        protocol: "tcp"
+  - name: Configure IPv4 addresses.
+    fortios_address:
+      host:  "{{  host }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      state: "present"
+      name: "{{ prefix }}-VNET"
+      type: ipmask
+      value: "{{ vnet }}"
+  - name: Configure Outbound IPv4 policy.
+    fortios_firewall_policy:
+      host:  "{{ host }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      vdom:  "{{ vdom }}"
+      https: True
+      firewall_policy:
+        policyid: "2"
+        state: "present"
+        action: "accept"
+        dstintf:
+         -
+            name: "port1"
+        dstaddr:
+         -
+            name: "all"
+        srcintf:
+         -
+            name: "port2"
+        srcaddr:
+         -
+            name: "{{ prefix }}-VNET"
+        service:
+         - { name: "HTTPS" }
+         - { name: "HTTP" }
+         - { name: "PING" }
+        logtraffic: "all"
+        name: "Outbound"
+        nat: "enable"
+        natoutbound: "enable"
+        webfilter-profile: "default"
+        av-profile: "default"
+        dnsfilter-profile: "default"
+        utm-status: "enable"
+        schedule: "always"
+  - name: Configure Inbound FAZ MGMT IPv4 policy.
+    fortios_firewall_policy:
+      host:  "{{ host }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      vdom:  "{{ vdom }}"
+      https: True
+      firewall_policy:
+        policyid: "3"
+        state: "present"
+        action: "accept"
+        dstintf:
+         -
+            name: "port2"
+        dstaddr:
+         -
+            name: "VIP_FAZ_MGMT_GUI"
+        srcintf:
+         -
+            name: "port1"
+        srcaddr:
+         -
+            name: "all"
+        service:
+         - { name: "HTTPS" }
+        logtraffic: "all"
+        name: "Inbound-FAZ-MGMT-HTTPS"
+        nat: "disable"
+        natoutbound: "disable"
+  - name: Configure Inbound FAZ SSH IPv4 policy.
+    fortios_firewall_policy:
+      host:  "{{ host }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      vdom:  "{{ vdom }}"
+      https: True
+      firewall_policy:
+        policyid: "4"
+        state: "present"
+        action: "accept"
+        dstintf:
+         -
+            name: "port2"
+        dstaddr:
+         -
+            name: "VIP_FAZ_MGMT_CLI"
+        srcintf:
+         -
+            name: "port1"
+        srcaddr:
+         -
+            name: "all"
+        service:
+         - { name: "SSH" }
+        logtraffic: "all"
+        name: "Inbound-FAZ-MGMT-SSH"
+        nat: "disable"
+        natoutbound: "disable"
+  - name: Configure Inbound LNX SSH IPv4 policy.
+    fortios_firewall_policy:
+      host:  "{{ host }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      vdom:  "{{ vdom }}"
+      https: True
+      firewall_policy:
+        policyid: "5"
+        state: "present"
+        action: "accept"
+        dstintf:
+         -
+            name: "port2"
+        dstaddr:
+         -
+            name: "VIP_LNX_CLI"
+        srcintf:
+         -
+            name: "port1"
+        srcaddr:
+         -
+            name: "all"
+        service:
+         - { name: "SSH" }
+        logtraffic: "all"
+        name: "Inbound-LNX-SSH"
+        nat: "disable"
+        natoutbound: "disable"
+  - name: Configure Inbound LNX HTTP IPv4 policy.
+    fortios_firewall_policy:
+      host:  "{{ host }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      vdom:  "{{ vdom }}"
+      https: True
+      firewall_policy:
+        policyid: "6"
+        state: "present"
+        action: "accept"
+        dstintf:
+         -
+            name: "port2"
+        dstaddr:
+         -
+            name: "VIP_LNX_HTTP"
+        srcintf:
+         -
+            name: "port1"
+        srcaddr:
+         -
+            name: "all"
+        service:
+         - { name: "HTTP" }
+        logtraffic: "all"
+        name: "Inbound-LNX-HTTP"
+        nat: "disable"
+        natoutbound: "disable"
+  - name: Global FortiAnalyzer settings.
+    fortios_log_fortianalyzer_setting:
+      host:  "{{ host }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      vdom: "{{ vdom }}"
+      https: True
+      log_fortianalyzer_setting:
+        server: "{{ faz_internal_ip }}"
+        status: "enable"
+        upload-option: "realtime"
