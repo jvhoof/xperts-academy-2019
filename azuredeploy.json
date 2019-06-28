@@ -752,5 +752,19 @@
           }
         }
       }
-    ]
+    ],
+    "outputs": {
+      "FortiGate": {
+        "type": "string",
+        "value": "[reference(variables('publicIPName')).ipAddress]"
+      },
+      "FortiAnalyzer": {
+        "type": "string",
+        "value": "[reference(variables('fazNicName')).ipAddress]"
+      },
+      "LinuxServer": {
+        "type": "string",
+        "value": "[reference(variables('lnxNicName')).ipAddress]"
+      }
+    }
   }
