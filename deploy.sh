@@ -121,13 +121,13 @@ echo "
 "
 fi
 
-host = `az vm show -d -g "$rg" -n "$prefix-FGT" --query publicIps -o tsv`
-fgt_external_ip = `az network nic show -g "$rg" -n "$prefix-FGT-Nic1" --query "ipConfigurations[0].privateIpAddress" -o tsv`
-faz_internal_ip = `az network nic show -g "$rg" -n "$prefix-FAZ-Nic" --query "ipConfigurations[0].privateIpAddress" -o tsv`
-lnx_internal_ip = `az network nic show -g "$rg" -n "$prefix-FGT-Nic" --query "ipConfigurations[0].privateIpAddress" -o tsv`
-vnet = `az network vnet show -g "$rg" -n "$prefix-VNET" --query "addressSpace.addressPrefixes[0]" -o tsv`
+host=`az vm show -d -g "$rg" -n "$prefix-FGT" --query publicIps -o tsv`
+fgt_external_ip=`az network nic show -g "$rg" -n "$prefix-FGT-Nic1" --query "ipConfigurations[0].privateIpAddress" -o tsv`
+faz_internal_ip=`az network nic show -g "$rg" -n "$prefix-FAZ-Nic" --query "ipConfigurations[0].privateIpAddress" -o tsv`
+lnx_internal_ip=`az network nic show -g "$rg" -n "$prefix-FGT-Nic" --query "ipConfigurations[0].privateIpAddress" -o tsv`
+vnet=`az network vnet show -g "$rg" -n "$prefix-VNET" --query "addressSpace.addressPrefixes[0]" -o tsv`
 #
-ansible-playbook /data/fortigate_config.yml -vvv \
+ansible-playbook ansible/fortigate_config.yml -vvv \
                 --extra-vars "host=$host prefix=$prefix username=$username password=$password vnet=$vnet fgt_external_ip=$fgt_external_ip faz_internal_ip=$faz_internal_ip lnx_internal_ip=$lnx_internal_ip"
 #
 

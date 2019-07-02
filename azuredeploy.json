@@ -824,11 +824,11 @@
       },
       "FortiAnalyzer": {
         "type": "string",
-        "value": "[reference(variables('fazNicName')).value.ipConfigurations[0].properties.privateIPAddress]"
+        "value": "[reference(variables('fazNicName')).ipConfigurations[0].properties.privateIPAddress]"
       },
       "LinuxServer": {
         "type": "string",
-        "value": "[reference(variables('lnxNicName')).value.ipConfigurations[0].properties.privateIPAddress]"
+        "value": "[reference(variables('lnxNicName')).ipConfigurations[0].properties.privateIPAddress]"
       }
     }
   }
