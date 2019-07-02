@@ -78,7 +78,10 @@ rg="$prefix-RG"
 echo ""
 echo "==> Ansible configuration"
 echo ""
-ansible-playbook ansible/fortigate_config.yml \
+docker run --rm -itv $PWD:/data \
+            jvhoof/cloudgen-essentials \
+                ansible-playbook /data/ansible/fortigate_config.yml \
                     --extra-vars "host=$host prefix=$prefix username=$username password=$passwd vnet=$vnet fgt_external_ip=$fgt_external_ip faz_internal_ip=$faz_internal_ip lnx_internal_ip=$lnx_internal_ip"
+#
 
 exit 0
