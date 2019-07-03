@@ -2,8 +2,6 @@
 echo "
 ##############################################################################################################
 #
-# Deployment of a Fortigate Active/Active cluster
-#
 ##############################################################################################################
 
 "
@@ -77,9 +75,16 @@ echo "--> Using username '$username' ..."
 echo ""
 
 license=''
-if [ -f "license/fgt.lic" ]; then
-   echo "Loading license file license/fgt.lic."
-   license=`cat license/fgt.lic`
+if [ -z "$DEPLOY_LICENSE" ] 
+then
+    DEPLOY_LICENSE="license/fgt.lic"
+fi
+if [ -r "$DEPLOY_LICENSE" ]
+then
+    echo ""
+    echo "--> License file found in location $DEPLOY_LICENSE ..."
+    echo ""
+    license=`cat $DEPLOY_LICENSE`
 fi
 
 # Create resource group
@@ -120,15 +125,5 @@ echo "
 ##############################################################################################################
 "
 fi
-
-host=`az vm show -d -g "$rg" -n "$prefix-FGT" --query publicIps -o tsv`
-fgt_external_ip=`az network nic show -g "$rg" -n "$prefix-FGT-Nic1" --query "ipConfigurations[0].privateIpAddress" -o tsv`
-faz_internal_ip=`az network nic show -g "$rg" -n "$prefix-FAZ-Nic" --query "ipConfigurations[0].privateIpAddress" -o tsv`
-lnx_internal_ip=`az network nic show -g "$rg" -n "$prefix-FGT-Nic" --query "ipConfigurations[0].privateIpAddress" -o tsv`
-vnet=`az network vnet show -g "$rg" -n "$prefix-VNET" --query "addressSpace.addressPrefixes[0]" -o tsv`
-#
-ansible-playbook ansible/fortigate_config.yml -vvv \
-                --extra-vars "host=$host prefix=$prefix username=$username password=$password vnet=$vnet fgt_external_ip=$fgt_external_ip faz_internal_ip=$faz_internal_ip lnx_internal_ip=$lnx_internal_ip"
-#
 
 exit 0
