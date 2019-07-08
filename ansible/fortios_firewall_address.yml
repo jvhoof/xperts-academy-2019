@@ -1,0 +1,32 @@
+- hosts: localhost
+  connection: local
+  gather_facts: "no"
+  vars:
+   vdom: "root"
+  tasks:
+  - name: Configure IPv4 addresses.
+    fortios_firewall_address:
+      host:  "{{  host }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      vdom: "{{ vdom }}"
+      https: True
+      firewall_address:
+        name: "{{ prefix }}-VNET"
+        state: "present"
+        comment: "{{ prefix }}-VNET"
+        subnet: "{{ vnet }}"
+        type: "ipmask"
+        visibility: enable
+        list: []
+        allow-routing: "disable"
+        associated-interface: ""
+        country: ""
+        epg-name: ""
+        filter: ""
+        fqdn: ""
+        organization: ""
+        policy-group: ""
+        cache-ttl: 0
+        color: 0
+
